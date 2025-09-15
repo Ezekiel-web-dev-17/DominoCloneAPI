@@ -1,6 +1,6 @@
 import { startSession } from "mongoose";
-import { errorResponse, successResponse } from "../utils/response.util";
-import { comparePassword, hashPassword } from "../utils/helpers.util";
+import { errorResponse, successResponse } from "../utils/response.util.js";
+import { comparePassword, hashPassword } from "../utils/helpers.util.js";
 import { generateToken } from "../utils/jwt.utils.js";
 import { User } from "../models/user.model.js";
 import { JWT_EXPIRES_IN, JWT_SECRET } from "../config/env.config.js";
@@ -70,11 +70,7 @@ export const signIn = async (req, res, next) => {
 
     const isValidPassword = await comparePassword(password, user.password);
 
-    if (!isValidPassword) {
-      const error = new Error("Invalid password");
-      error.statusCode = 401;
-      throw error;
-    }
+    if (!isValidPassword) return errorResponse(res, "Invalid password", 401);
 
     const token = generateToken(
       { userId: user._id },

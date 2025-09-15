@@ -7,11 +7,13 @@ import helmet from "helmet";
 import authRoute from "./routes/auth.route.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
 import { FRONTEND_DEV_URL, FRONTEND_URL } from "./config/env.config.js";
+import productRoute from "./routes/product.route.js";
 
 const app = express();
 
 // Middlewares
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(morgan("dev"));
 
@@ -27,9 +29,8 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
-    methods: ["GET", "POST", "PUT", "DELETE"], // Only allow what’s needed
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"], // Restrict headers
-    credentials: true, // Only if you use cookies/sessions
   })
 );
 
@@ -50,6 +51,7 @@ app.use(
 
 // Routes
 app.use("/api/v1/auth", authRoute);
+app.use("/api/v1/product", productRoute);
 
 // Error handler
 app.use(errorMiddleware);
