@@ -35,10 +35,16 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    phoneNumber: {
+      type: String,
+      minLength: 10,
+      matches: [
+        /^\+?[1-9]\d{0,3}[-.\s]?\(?\d+\)?([-.\s]?\d+)*$/,
+        "Please provide a valid phone number",
+      ],
+    },
   },
   { timestamps: true }
 );
 
-const Order = mongoose.model("Order", orderSchema);
-
-export default Order;
+export const Order = mongoose.model("Order", orderSchema);

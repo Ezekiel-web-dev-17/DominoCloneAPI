@@ -49,7 +49,7 @@ app.use(
 );
 
 // Routes
-app.use("/api/auth", authRoute);
+app.use("/api/v1/auth", authRoute);
 
 // Error handler
 app.use(errorMiddleware);
