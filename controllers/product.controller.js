@@ -1,3 +1,4 @@
+import logger from "../config/logger.config.js";
 import { Product } from "../models/product.model.js";
 import { errorResponse, successResponse } from "../utils/response.util.js";
 
@@ -162,17 +163,16 @@ export const deleteProduct = async (req, res, next) => {
 export const toggleAvailability = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const product = await Product.findById(id);
+    const prevProduct = await Product.findById(id);
 
-    if (!product) return errorResponse(res, "Product not found!", 404);
+    if (!prevProduct) return errorResponse(res, "Product not found!", 404);
 
-    product.available = !product.available;
-    await product.save();
+    await prevProduct.updateOne({ available: !prevProduct.available });
 
     return successResponse(res, {
-      product,
+      prevProduct,
       message: `Product is now ${
-        product.available ? "available" : "unavailable"
+        !prevProduct.available ? "available" : "unavailable"
       }`,
     });
   } catch (error) {
@@ -201,22 +201,35 @@ export const getRecommendedProducts = async (req, res, next) => {
 /* ================= SEARCH PRODUCTS ================= */
 export const searchProducts = async (req, res, next) => {
   try {
-    const { query } = req.query;
+    const { name, description, tags } = req.query;
 
-    if (!query) return errorResponse(res, "Search query is required!", 400);
+    if (!name && !description && !tags)
+      return errorResponse(res, "Name, Description or Tags is required!", 400);
 
-    const products = await Product.find({
-      $or: [
-        { name: { $regex: query, $options: "i" } },
-        { description: { $regex: query, $options: "i" } },
-        { tags: { $regex: query, $options: "i" } },
-      ],
-    });
+    for (const query in req.query) {
+      if (query !== "tags") {
+        const products = await Product.find({
+          [`${query}`]: req.query[query].replaceAll("%20", " "),
+        });
 
-    return successResponse(res, {
-      products,
-      message: "Search results fetched!",
-    });
+        logger.info(`Search for: ${req.query[query]}`);
+        return successResponse(res, {
+          products,
+          message: "Search results fetched!",
+        });
+      }
+      const products = await Product.find({
+        tags,
+      });
+      const tagProducts = products.filter((product) =>
+        product.tags.includes(req.query[query])
+      );
+
+      return successResponse(res, {
+        products: tagProducts,
+        message: "Search results fetched!",
+      });
+    }
   } catch (error) {
     next(error);
   }

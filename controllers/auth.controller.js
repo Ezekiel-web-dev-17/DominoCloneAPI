@@ -38,7 +38,8 @@ export const signUp = async (req, res, next) => {
       JWT_EXPIRES_IN
     );
 
-    session.commitTransaction(); // sends data to database
+    await session.commitTransaction(); // sends data to database
+    session.endSession();
     // response after transactions end.
     successResponse(
       res,
@@ -47,16 +48,15 @@ export const signUp = async (req, res, next) => {
         message: "User created successfully.",
         data: {
           token,
-          user: newUsers,
+          user,
         },
       },
       201
     );
   } catch (err) {
     await session.abortTransaction();
-    next(err);
-  } finally {
     session.endSession();
+    next(err);
   }
 };
 

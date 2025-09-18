@@ -8,6 +8,10 @@ import authRoute from "./routes/auth.route.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
 import { FRONTEND_DEV_URL, FRONTEND_URL } from "./config/env.config.js";
 import productRoute from "./routes/product.route.js";
+import arcjetMiddleware from "./middleware/arcjet.middleware.js";
+import { authMiddleware, isAdmin } from "./middleware/auth.middleware.js";
+import orderRoute from "./routes/order.route.js";
+import usersRoute from "./routes/user.routes.js";
 
 const app = express();
 
@@ -49,9 +53,15 @@ app.use(
   })
 );
 
+// Arcjet
+app.use(arcjetMiddleware);
+
 // Routes
 app.use("/api/v1/auth", authRoute);
-app.use("/api/v1/product", productRoute);
+app.use(authMiddleware);
+app.use("/api/v1/users", usersRoute);
+app.use("/api/v1/products", isAdmin, productRoute);
+app.use("/api/v1/orders", orderRoute);
 
 // Error handler
 app.use(errorMiddleware);

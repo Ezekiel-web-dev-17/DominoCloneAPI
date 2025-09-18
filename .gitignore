@@ -4,6 +4,7 @@ node_modules/
 # ignore all log files and folder
 logs/
 *.log
+.vscode/
 
 # ignore environment files
 .env

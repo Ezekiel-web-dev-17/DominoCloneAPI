@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const sizeSchema = new mongoose.Schema({
   size: {
     type: String,
-    enum: ["small", "medium", "large"],
+    enum: ["small", "medium", "large", "regular"],
     required: true,
   },
   price: {
@@ -32,7 +32,15 @@ const productSchema = new mongoose.Schema(
     description: String,
     category: {
       type: String,
-      enum: ["pizza", "sides", "drinks", "desserts"],
+      enum: [
+        "pizza",
+        "sides",
+        "drinks",
+        "sides",
+        "extras",
+        "desserts",
+        "chicken",
+      ],
       required: true,
     },
     imageUrl: String,
