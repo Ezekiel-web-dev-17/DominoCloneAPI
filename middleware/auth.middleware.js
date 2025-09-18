@@ -1,7 +1,9 @@
-import User from "../models/user.model.js";
+import jwt from "jsonwebtoken";
+import { User } from "../models/user.model.js";
 import { errorResponse } from "../utils/response.util.js";
+import { JWT_SECRET } from "../config/env.config.js";
 
-const authMiddleware = async (req, res, next) => {
+export const authMiddleware = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
@@ -10,9 +12,9 @@ const authMiddleware = async (req, res, next) => {
     }
 
     const token = authHeader.split(" ")[1];
-    const decoded = verifyToken(token);
+    const decoded = jwt.verify(token, JWT_SECRET);
 
-    const user = await User.findById(decoded.id).select("-password");
+    const user = await User.findById(decoded.userId).select("-password");
     if (!user) {
       return errorResponse(res, "User not found", 401);
     }
@@ -24,4 +26,34 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-export default authMiddleware;
+export const isAdmin = async (req, res, next) => {
+  try {
+    const user = req.user;
+
+    // 4️⃣ Check if user is admin
+    if (user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Forbidden: Admins only" });
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const isDriverOrAdmin = async (req, res, next) => {
+  try {
+    const user = req.user;
+
+    // 4️⃣ Check if user is admin
+    if (user.role !== "driver" && user.role !== "admin") {
+      return errorResponse(res, "Forbidden: Admins and Drivers only", 403);
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+};

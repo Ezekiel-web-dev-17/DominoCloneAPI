@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema(
       required: [true, "Email is required"],
       unique: true,
       lowercase: true,
+      match: [/\S+@\S+\.\S+/, "Please provide a valid email address"],
     },
     password: {
       type: String,
@@ -23,9 +24,16 @@ const userSchema = new mongoose.Schema(
       default: "customer",
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: {
+      transform: function (doc, ret) {
+        ret.id = ret._id;
+        delete ret.__v;
+        delete ret.password;
+      },
+    },
+  }
 );
 
-const User = mongoose.model("User", userSchema);
-
-export default User;
+export const User = mongoose.model("User", userSchema);

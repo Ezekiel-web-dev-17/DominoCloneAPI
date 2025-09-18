@@ -7,11 +7,17 @@ import helmet from "helmet";
 import authRoute from "./routes/auth.route.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
 import { FRONTEND_DEV_URL, FRONTEND_URL } from "./config/env.config.js";
+import productRoute from "./routes/product.route.js";
+import arcjetMiddleware from "./middleware/arcjet.middleware.js";
+import { authMiddleware, isAdmin } from "./middleware/auth.middleware.js";
+import orderRoute from "./routes/order.route.js";
+import usersRoute from "./routes/user.routes.js";
 
 const app = express();
 
 // Middlewares
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(morgan("dev"));
 
@@ -27,9 +33,8 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
-    methods: ["GET", "POST", "PUT", "DELETE"], // Only allow what’s needed
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"], // Restrict headers
-    credentials: true, // Only if you use cookies/sessions
   })
 );
 
@@ -48,8 +53,15 @@ app.use(
   })
 );
 
+// Arcjet
+app.use(arcjetMiddleware);
+
 // Routes
-app.use("/api/auth", authRoute);
+app.use("/api/v1/auth", authRoute);
+app.use(authMiddleware);
+app.use("/api/v1/users", usersRoute);
+app.use("/api/v1/products", isAdmin, productRoute);
+app.use("/api/v1/orders", orderRoute);
 
 // Error handler
 app.use(errorMiddleware);
