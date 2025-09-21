@@ -87,7 +87,7 @@ Track your delivery in real-time in your account.
 });
 
 export const orderDeliveredTemplate = (user, order) => ({
-  subject: "✅ Your Domino’s order has arrived!",
+  subject: "Your Domino’s order has arrived!",
   text: `Hi ${user.name},
 
 Your order #${order.orderCode} has just been delivered. 
@@ -112,7 +112,6 @@ export const orderCancelledTemplate = (user, order) => ({
   text: `Hi ${user.name},
 
 We’re sorry – your order #${order.orderCode} has been cancelled.  
-Reason: ${order.cancelReason || "Not specified"}.
 
 If payment was processed, a refund is already on its way to you.
 
@@ -122,10 +121,7 @@ We hope to serve you again soon with a better experience.
 
   html: `
   <h2>Hi ${user.name},</h2>
-  <p>We’re sorry – your order <b>#${
-    order.orderCode
-  }</b> has been <b>cancelled</b>. 😔</p>
-  <p><b>Reason:</b> ${order.cancelReason || "Not specified"}.</p>
+  <p>We’re sorry – your order <b>#${order.orderCode}</b> has been <b>cancelled</b>. 😔</p>
   <p>If payment was processed, a refund is already on its way to you.</p>
   <p>We hope to serve you again soon with a better experience.</p>
   <br/>

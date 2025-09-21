@@ -110,7 +110,7 @@ orderSchema.pre("save", async function (next) {
           `The Price of this ${sizeInfo.size} ${product.name} is $${sizeInfo.price} not $${item.price}.`
         );
 
-      // ✅ enforce correct price from product
+      // Enforce correct price from product
       item.price = sizeInfo.price;
 
       // compute line total

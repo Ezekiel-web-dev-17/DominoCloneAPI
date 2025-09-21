@@ -9,12 +9,14 @@ import {
   getRecommendedProducts,
   searchProducts,
 } from "../controllers/product.controller.js";
+import { isAdmin } from "../middleware/auth.middleware.js";
+import upload from "../middleware/multer.middleware.js";
 
 const productRoute = express.Router();
 
 /* ================= CRUD ================= */
 // Create a new product
-productRoute.post("/", createProduct);
+productRoute.post("/", isAdmin, upload.single("file"), createProduct);
 
 // Get all products (with optional filters: category, available, search, pagination)
 productRoute.get("/", getAllProducts);
@@ -29,12 +31,12 @@ productRoute.get("/search", searchProducts);
 productRoute.get("/:id", getProductById);
 
 // Update product by ID
-productRoute.patch("/:id", updateProduct);
+productRoute.patch("/:id", isAdmin, updateProduct);
 
 // Delete product by ID
-productRoute.delete("/:id", deleteProduct);
+productRoute.delete("/:id", isAdmin, deleteProduct);
 
 // Toggle availability (quick switch)
-productRoute.patch("/:id/availability", toggleAvailability);
+productRoute.patch("/:id/availability", isAdmin, toggleAvailability);
 
 export default productRoute;

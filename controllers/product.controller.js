@@ -1,11 +1,12 @@
 import logger from "../config/logger.config.js";
 import { Product } from "../models/product.model.js";
 import { errorResponse, successResponse } from "../utils/response.util.js";
+import { v2 as cloudinary } from "cloudinary";
 
 /* ================= CREATE PRODUCT ================= */
 export const createProduct = async (req, res, next) => {
   try {
-    const {
+    let {
       name,
       description,
       category,
@@ -20,6 +21,9 @@ export const createProduct = async (req, res, next) => {
       isRecommended,
     } = req.body;
 
+    if (typeof sizes === "string") sizes = JSON.parse(sizes);
+    if (typeof toppings === "string") toppings = JSON.parse(toppings);
+
     if (!name || !category || !sizes || !sizes.length) {
       return errorResponse(
         res,
@@ -28,10 +32,29 @@ export const createProduct = async (req, res, next) => {
       );
     }
 
+    if (!req.file) return errorResponse(res, "Product image is required.", 400);
+
     const existingProduct = await Product.findOne({ name });
     if (existingProduct) {
       return errorResponse(res, "Product with this name already exists!", 400);
     }
+
+    // Upload product image to Cloudinary from buffer
+    const uploadResult = await cloudinary.uploader.upload_stream(
+      { public_id: "domino product" },
+      (error, result) => {
+        if (error) return next(error);
+        return result;
+      }
+    );
+
+    // ⚡ If you’re not using streams, you need to write buffer to temp file first.
+    // Or switch to `multer.diskStorage()` and upload with `req.file.path`.
+
+    const optimizeUrl = cloudinary.url("domino product", {
+      fetch_format: "auto",
+      quality: "auto",
+    });
 
     const product = new Product({
       name,
@@ -46,6 +69,8 @@ export const createProduct = async (req, res, next) => {
       tags,
       rating,
       isRecommended,
+      productImage: uploadResult.secure_url,
+      optimizedImage: optimizeUrl.secure_url,
     });
 
     await product.save();
@@ -218,9 +243,11 @@ export const searchProducts = async (req, res, next) => {
           message: "Search results fetched!",
         });
       }
+
       const products = await Product.find({
         tags,
       });
+
       const tagProducts = products.filter((product) =>
         product.tags.includes(req.query[query])
       );
