@@ -71,12 +71,15 @@ app.use(arcjetMiddleware);
 
 // Routes
 app.use("/api/v1/auth", authRoute);
+app.use("/api/v1/products", productRoute);
 app.use(authMiddleware);
 app.use("/api/v1/users", usersRoute);
-app.use("/api/v1/products", productRoute);
 app.use("/api/v1/orders", orderRoute);
 
 // Error handler
 app.use(errorMiddleware);
+app.use("/api/v1/health", (req, res) => res.send({ health: true }));
+app.use("/", (req, res) => res.send({ message: "This is an Error Route." }));
+app.use("/", (req, res) => res.send("Hello and welcome to the Dominos API."));
 
 export default app;

@@ -39,7 +39,7 @@ export const signUp = async (req, res, next) => {
     const existingUser = await User.findOne({ email });
 
     // if it finds a user with the inputed email returns an error "User already exists".
-    if (existingUser & existingUser.isVerified)
+    if (existingUser && existingUser.isVerified)
       return errorResponse(res, "User already exists", 409);
 
     const hashedPass = await hashPassword(password);
@@ -61,6 +61,16 @@ export const signUp = async (req, res, next) => {
       JWT_EXPIRES_IN
     );
 
+    const hashed = crypto.createHash("sha256").update(token).digest("hex");
+    const now = new Date();
+    const expAt = new Date(now.getTime() + 15 * 60 * 1000);
+
+    await verifyEmail.create({
+      userId: user._id,
+      hashedToken: hashed,
+      expiresAt: expAt,
+    });
+
     await sendAccountVerification(user, token, JWT_EXPIRES_IN);
 
     await session.commitTransaction(); // sends data to database
@@ -69,8 +79,8 @@ export const signUp = async (req, res, next) => {
 
     const data = { user };
 
-    if (NODE_ENV === "development") {
-      data[token] = token;
+    if (NODE_ENV !== "production") {
+      data.token = token;
     }
 
     successResponse(
@@ -92,11 +102,18 @@ export const signIn = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
+    if (!email || !password)
+      return errorResponse(
+        res,
+        "User email and password must be provided!",
+        400
+      );
+
     const user = await User.findOne({ email });
 
     if (!user) return errorResponse(res, "User not found", 404);
     if (!user.isVerified)
-      return errorResponse(res, "This user's email is not verified.", 403);
+      return errorResponse(res, "User is not verified.", 403);
 
     const isValidPassword = await comparePassword(password, user.password);
 
@@ -281,10 +298,17 @@ export const refreshToken = async (req, res, next) => {
 export const logout = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
-    if (!user)
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+    if (!user) return errorResponse(res, "User not found", 404);
+
+    if (!user.isVerified)
+      return errorResponse(res, "User is not verified.", 400);
+
+    if (!user.refreshTokens.length)
+      return errorResponse(
+        res,
+        "You are currently logged out from all your devices.",
+        400
+      );
 
     user.refreshTokens = [];
 
@@ -292,14 +316,19 @@ export const logout = async (req, res, next) => {
     user.tokenVersion += 1;
     await user.save();
 
-    res.clearCookie("refreshToken", {
+    res.clearCookie("session", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     });
 
-    res.status(200).json({
-      success: true,
+    res.clearCookie("rememberMe", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    successResponse(res, {
       message: "Logged out successfully. Access revoked.",
     });
   } catch (error) {

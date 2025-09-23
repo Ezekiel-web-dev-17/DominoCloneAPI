@@ -1,4 +1,4 @@
-import { JWT_REFRESH_EXPIRES_IN } from "../config/env.config.js";
+import { JWT_REFRESH_EXPIRES_IN, NODE_ENV } from "../config/env.config.js";
 
 export const successResponse = (res, payload = {}, status = 200) => {
   return res.status(status).json({
@@ -8,11 +8,20 @@ export const successResponse = (res, payload = {}, status = 200) => {
 };
 
 export const sendTokenResponse = (res, accessToken, refreshToken) => {
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true, // JS can't touch it
+  // Short session cookie
+  res.cookie("session", accessToken, {
+    httpOnly: true,
     secure: process.env.NODE_ENV === "production", // HTTPS only in prod
     sameSite: "strict", // CSRF protection
-    maxAge: JWT_REFRESH_EXPIRES_IN,
+    maxAge: NODE_ENV === "production" ? 60 * 60 * 1000 : 5 * 1000, // 1 hour
+  });
+
+  // Long "remember me" cookie
+  res.cookie("rememberMe", refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production", // HTTPS only in prod
+    sameSite: "strict", // CSRF protection
+    maxAge: NODE_ENV === "production" ? 30 * 24 * 60 * 60 * 1000 : 15 * 1000, // 30 hour
   });
 
   return res.json({

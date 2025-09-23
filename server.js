@@ -8,5 +8,5 @@ app.listen(4000, async () => {
   // Connect to database
   logger.info("Connecting Server to MongoDB...");
   await connectDB();
-  logger.info(`🚀 Server running on ${LIVE_URL}`);
+  logger.info(`Server running on ${LIVE_URL}`);
 });

@@ -6,10 +6,11 @@ import {
   getUsers,
   updateUser,
 } from "../controllers/user.controller.js";
+import { cache } from "../middleware/redis.middleware.js";
 
 const usersRoute = Router();
 
-usersRoute.get("/", isAdmin, getUsers);
+usersRoute.get("/", isAdmin, cache("get users: "), getUsers);
 usersRoute.get("/:id", getUser);
 usersRoute.patch("/:id", updateUser);
 usersRoute.delete("/:id", deleteUser);

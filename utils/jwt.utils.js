@@ -1,5 +1,10 @@
 import jwt from "jsonwebtoken";
-import { JWT_REFRESH_EXPIRES_IN } from "../config/env.config.js";
+import {
+  JWT_REFRESH_EXPIRES_IN,
+  JWT_REFRESH_SECRET,
+  JWT_SECRET,
+} from "../config/env.config.js";
+import { hashPassword } from "./helpers.util.js";
 
 export const generateToken = (userData, secret, expires) => {
   return jwt.sign({ ...userData }, secret, {

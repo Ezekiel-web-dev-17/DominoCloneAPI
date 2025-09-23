@@ -13,7 +13,7 @@ import { sendEmail } from "../utils/email.util.js";
 
 //USER AUTH RELATED EMAILS
 export const sendAccountVerification = async (user, token, time = "15min") => {
-  const verifyUrl = `${LIVE_URL}/verify-email?token=${encodeURIComponent(
+  const verifyUrl = `${LIVE_URL}auth/verify-email?token=${encodeURIComponent(
     token
   )}&userId=${user._id}`;
   const { subject, text, html } = accountVerificationTemplate(

@@ -1,5 +1,6 @@
 import logger from "../config/logger.config.js";
 import { Product } from "../models/product.model.js";
+import redis from "../utils/redis.util.js";
 import { errorResponse, successResponse } from "../utils/response.util.js";
 import { v2 as cloudinary } from "cloudinary";
 
@@ -74,6 +75,8 @@ export const createProduct = async (req, res, next) => {
     });
 
     await product.save();
+
+    redis.del("All products: ");
 
     return successResponse(
       res,
@@ -161,6 +164,9 @@ export const updateProduct = async (req, res, next) => {
 
     if (!product) return errorResponse(res, "Product not found!", 404);
 
+    redis.del("All products: ");
+    redis.del("All recommended products: ");
+
     return successResponse(res, {
       product,
       message: "Product updated successfully!",
@@ -178,6 +184,8 @@ export const deleteProduct = async (req, res, next) => {
 
     if (!product) return errorResponse(res, "Product not found!", 404);
 
+    redis.del("All products: ");
+
     return successResponse(res, { message: "Product deleted successfully!" });
   } catch (error) {
     next(error);
@@ -193,6 +201,8 @@ export const toggleAvailability = async (req, res, next) => {
     if (!prevProduct) return errorResponse(res, "Product not found!", 404);
 
     await prevProduct.updateOne({ available: !prevProduct.available });
+
+    redis.del("All products: ");
 
     return successResponse(res, {
       prevProduct,
