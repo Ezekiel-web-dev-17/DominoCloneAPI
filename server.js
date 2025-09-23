@@ -1,12 +1,12 @@
 import app from "./app.js";
+import { LIVE_URL } from "./config/env.config.js";
 import logger from "./config/logger.config.js";
 import { connectDB } from "./database/connectToDB.js";
-import { PORT } from "./config/env.config.js";
 
 // Start server
-app.listen(PORT, () => {
+app.listen(4000, async () => {
   // Connect to database
   logger.info("Connecting Server to MongoDB...");
-  connectDB();
-  logger.info(`🚀 Server running on http://localhost:${PORT}`);
+  await connectDB();
+  logger.info(`Server running on ${LIVE_URL}`);
 });

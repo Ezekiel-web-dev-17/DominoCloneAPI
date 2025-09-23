@@ -1,4 +1,10 @@
 import jwt from "jsonwebtoken";
+import {
+  JWT_REFRESH_EXPIRES_IN,
+  JWT_REFRESH_SECRET,
+  JWT_SECRET,
+} from "../config/env.config.js";
+import { hashPassword } from "./helpers.util.js";
 
 export const generateToken = (userData, secret, expires) => {
   return jwt.sign({ ...userData }, secret, {
@@ -12,4 +18,18 @@ export const verifyToken = (token, secret) => {
 
 export const decodeToken = (token, secret) => {
   return jwt.decode(token, secret);
+};
+
+// Generate tokens
+export const generateRefreshTokens = async (user) => {
+  const payload = { userId: user._id, tokenVersion: user.tokenVersion };
+  const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: "30m" });
+  const refreshToken = jwt.sign(
+    { ...payload, type: "refresh" },
+    JWT_REFRESH_SECRET,
+    { expiresIn: JWT_REFRESH_EXPIRES_IN }
+  );
+  const refreshTokenHash = await hashPassword(refreshToken);
+
+  return { accessToken, refreshToken, refreshTokenHash };
 };

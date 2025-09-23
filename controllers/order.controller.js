@@ -17,7 +17,6 @@ export const calculateOrderTotal = (items) => {
 
 export const getOrders = async (req, res, next) => {
   try {
-    // logger.log("I only lose mind when i am not with you.");
     const orders = await Order.find({});
 
     if (!orders || !orders.length)
@@ -120,6 +119,8 @@ export const createOrder = async (req, res, next) => {
 };
 
 export const orderPayment = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     const { reference } = req.body;
 
@@ -143,18 +144,21 @@ export const orderPayment = async (req, res, next) => {
 
     // Verify transaction with Paystack
     const paymentData = await verifyPayment(reference);
-    logger.info(paymentData.status);
 
     if (paymentData.status !== "success") {
-      logger.warn(`Payment failed/abandoned: ${paymentData.gateway_response}`);
+      logger.error(`Payment failed/abandoned: ${paymentData.gateway_response}`);
       return errorResponse(res, "Payment verification failed!", 400);
     }
+    logger.info(`Payment status: ${paymentData.status}`);
 
     // Update order
     order.status = "placed";
-    await order.save();
+    await order.save({ session });
 
     await sendPaymentConfirmation(order.user, order);
+
+    await session.commitTransaction();
+    session.endSession();
 
     return successResponse(res, {
       message: "Order payment verified successfully.",
@@ -162,6 +166,8 @@ export const orderPayment = async (req, res, next) => {
       paymentData,
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     next(error);
   }
 };
@@ -178,7 +184,6 @@ export const trackOrder = async (req, res, next) => {
 
     const order = await Order.findById(id).populate("user");
 
-    logger.info(!order.user._id.equals(user._id));
     if (
       !order.user._id.equals(user._id) &&
       (user.role !== "admin" || user.role !== "driver")

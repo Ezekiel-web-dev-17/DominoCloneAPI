@@ -3,17 +3,25 @@ import { config } from "dotenv";
 config({ path: `.env.${process.env.NODE_ENV || "development"}.local` });
 
 export const {
-  PORT,
   MONGODB_URI,
   NODE_ENV,
+  LIVE_URL,
   FRONTEND_URL,
-  FRONTEND_DEV_URL,
   JWT_SECRET,
+  JWT_REFRESH_SECRET,
   JWT_EXPIRES_IN,
+  JWT_REFRESH_EXPIRES_IN,
   PAYMENT_SECRET_KEY,
   ARCJET_KEY,
   EMAIL_HOST,
   EMAIL_PORT,
   EMAIL_USER,
   EMAIL_PASS,
+  CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET,
+  REDIS_HOST,
+  REDIS_USERNAME,
+  REDIS_PORT,
+  REDIS_PASSWORD,
 } = process.env;

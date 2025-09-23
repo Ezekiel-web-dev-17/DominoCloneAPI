@@ -65,12 +65,28 @@ export const errorMiddleware = async (err, req, res, next) => {
       error = new Error(message.join(", "));
       error.statusCode = 400;
     }
+
+    if (error.name === "TokenExpiredError") {
+      error = new Error("Token has expired. Please login again.");
+      err.statusCode = 401;
+    }
+
+    if (error.name === "JsonWebTokenError") {
+      error = new Error("Invalid token format or signature.");
+      error.statusCode = 401;
+    }
+
+    if (error.name === "NotBeforeError") {
+      error = new Error("Token not active yet.");
+      error.statusCode = 401;
+    }
+
     return errorResponse(
       res,
       error.message || "Internal server error.",
       error.statusCode || 500
     );
   } catch (error) {
-    errorResponse(res, error, 404);
+    return errorResponse(res, error, 404);
   }
 };
