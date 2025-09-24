@@ -1,12 +1,17 @@
 import Redis from "ioredis";
 import logger from "../config/logger.config.js";
+import {
+  REDIS_HOST,
+  REDIS_PASSWORD,
+  REDIS_PORT,
+  REDIS_USERNAME,
+} from "../config/env.config.js";
 
 const redis = new Redis({
-  username: "default",
-  host: process.env.REDIS_HOST,
-  port: process.env.REDIS_PORT,
-  password: process.env.REDIS_PASSWORD,
-  tls: process.env.NODE_ENV === "production" ? {} : undefined,
+  username: REDIS_USERNAME,
+  host: REDIS_HOST,
+  port: Number(REDIS_PORT),
+  password: REDIS_PASSWORD,
 });
 
 redis.on("connect", () => {
