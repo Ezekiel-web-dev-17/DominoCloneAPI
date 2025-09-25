@@ -12,15 +12,20 @@ import nodemailer from "nodemailer";
  * - You can switch between Gmail, Mailtrap, or SendGrid SMTP
  */
 const transporter = nodemailer.createTransport({
-  host: EMAIL_HOST,
-  port: Number(EMAIL_PORT),
-  secure: Number(EMAIL_PORT) === 465, // true for 465, false for others
+  // host: EMAIL_HOST,
+  // port: Number(EMAIL_PORT),
+  // secure: Number(EMAIL_PORT) === 465, // true for 465, false for others
+  // auth: {
+  //   user: EMAIL_USER,
+  //   pass: EMAIL_PASS,
+  // },
+  // tls: {
+  //   rejectUnauthorized: false, // sometimes needed on Render
+  // },
+  service: "gmail",
   auth: {
-    user: EMAIL_USER,
-    pass: EMAIL_PASS,
-  },
-  tls: {
-    rejectUnauthorized: false, // sometimes needed on Render
+    user: process.env.EMAIL,
+    pass: process.env.PASSWORD,
   },
 });
 
