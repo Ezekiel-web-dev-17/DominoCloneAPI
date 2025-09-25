@@ -13,11 +13,14 @@ import nodemailer from "nodemailer";
  */
 const transporter = nodemailer.createTransport({
   host: EMAIL_HOST,
-  port: EMAIL_PORT,
-  secure: "true",
+  port: Number(EMAIL_PORT),
+  secure: Number(EMAIL_PORT) === 465, // true for 465, false for others
   auth: {
     user: EMAIL_USER,
     pass: EMAIL_PASS,
+  },
+  tls: {
+    rejectUnauthorized: false, // sometimes needed on Render
   },
 });
 
@@ -38,6 +41,15 @@ export const sendEmail = async ({ to, subject, text, html }) => {
       text,
       html,
     };
+
+    logger.info("Connecting to SMTP...");
+    transporter.verify((err, success) => {
+      if (err) {
+        logger.error("SMTP connection failed:", err);
+      } else {
+        logger.info("SMTP server is ready to send:", success);
+      }
+    });
 
     const info = await transporter.sendMail(mailOptions);
 
