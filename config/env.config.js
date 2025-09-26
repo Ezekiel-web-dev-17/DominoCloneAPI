@@ -24,4 +24,5 @@ export const {
   REDIS_USERNAME,
   REDIS_PORT,
   REDIS_PASSWORD,
+  SENDGRID_API,
 } = process.env;

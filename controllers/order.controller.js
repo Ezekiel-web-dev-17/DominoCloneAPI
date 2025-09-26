@@ -250,6 +250,15 @@ export const updateOrder = async (req, res, next) => {
       );
     }
 
+    // Get io instance from Express
+    const dominoIo = req.app.get("dominoIo");
+
+    // Emit to all clients in that order's room
+    dominoIo.to(id).emit("order_status", {
+      orderId: order._id,
+      status: order.status,
+    });
+
     return successResponse(
       res,
       { message: "Order updated successfully!" },

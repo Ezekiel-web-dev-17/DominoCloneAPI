@@ -1,36 +1,47 @@
 import app from "./app.js";
 import http from "http";
-import { LIVE_URL } from "./config/env.config.js";
+import { LIVE_URL, NODE_ENV } from "./config/env.config.js";
 import logger from "./config/logger.config.js";
 import { connectDB } from "./database/connectToDB.js";
 import { Server } from "socket.io";
 
+// Create HTTP server
 const server = http.createServer(app);
 
-const io = new Server(server, {
+// Attach Socket.IO
+const dominoIo = new Server(server, {
   cors: {
-    origin: "*", // change to your frontend URL in production
-    methods: ["GET", "POST"],
+    origin:
+      NODE_ENV === "production"
+        ? [
+            "http://localhost:5173",
+            "http://localhost:5174",
+            "https://domino-clone.vercel.app",
+          ]
+        : "*",
+    methods: ["GET", "POST", "PATCH", "DELETE"],
   },
 });
 
-io.on("connection", (socket) => {
-  console.log("A user connected:", socket.id);
+// Attach dominoIo to app for controllers to use
+app.set("dominoIo", dominoIo);
 
-  // Example: join a room for tracking an order
+// Socket.IO connection
+dominoIo.on("connection", (socket) => {
+  console.log("Client connected:", socket.id);
+
   socket.on("join_order", (orderId) => {
     socket.join(orderId);
-    console.log(`User ${socket.id} joined order room ${orderId}`);
+    console.log(`Client ${socket.id} joined room ${orderId}`);
   });
 
-  // Example: handle disconnection
   socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
+    console.log("Client disconnected:", socket.id);
   });
 });
 
 // Start server
-app.listen(4000, async () => {
+server.listen(4000, async () => {
   // Connect to database
   logger.info("Connecting Server to MongoDB...");
   await connectDB();

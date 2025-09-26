@@ -211,6 +211,8 @@ export const resetPassword = async (req, res, next) => {
     const { newPassword } = req.body;
     const { token, userId } = req.query;
 
+    console.log("newPassword true");
+
     if (!newPassword)
       return errorResponse(res, "New password is required!", 400);
 
