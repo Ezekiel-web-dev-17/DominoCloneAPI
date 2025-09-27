@@ -137,20 +137,21 @@ export const authOpts = async (req, res, next) => {
 
 /* 4) Authentication Verify */
 export const authVerify = async (req, res, next) => {
-  const { credential } = req.body; // the assertion response from browser
-  const { userId } = req.body;
-  const user = await getUserById(userId);
-
-  if (!user.isVerified) return errorResponse(res, "user is not verified", 400);
-  const expectedChallenge = await redis.get(userId);
-  const credID = base64url(credential.rawId); // base64url String
-
-  const savedCred = user.webauthnCredentials.find(
-    (c) => c.credentialID === credID
-  );
-  if (!savedCred) return errorResponse(res, "Unknown credential", 400);
-
   try {
+    const { credential, userId } = req.body;
+    const user = await getUserById(userId);
+
+    if (!user.isVerified)
+      return errorResponse(res, "User is not verified", 400);
+
+    const expectedChallenge = await redis.get(userId);
+    const credID = base64url(credential.rawId);
+
+    const savedCred = user.webauthnCredentials.find(
+      (c) => c.credentialID === credID
+    );
+    if (!savedCred) return errorResponse(res, "Unknown credential", 400);
+
     const verification = await verifyAuthenticationResponse({
       credential,
       expectedChallenge,
@@ -163,16 +164,32 @@ export const authVerify = async (req, res, next) => {
       },
     });
 
-    const { verified, authenticationInfo } = verification;
-    if (!verified) return errorResponse(res, "Authentication failed", 400);
+    if (!verification.verified)
+      return errorResponse(res, "Authentication failed", 400);
 
-    // update counter
-    savedCred.counter = authenticationInfo.newCounter;
+    // Update counter
+    savedCred.counter = verification.authenticationInfo.newCounter;
     await updateUserCredentialCounter(
       userId,
       savedCred.credentialID,
       savedCred.counter
     );
+
+    // 🚀 FIXED: Generate and send tokens
+    const { accessToken, refreshToken, refreshTokenHash } =
+      await generateRefreshTokens(user);
+
+    user.refreshTokens.push({
+      tokenHash: refreshTokenHash,
+      createdAt: new Date(),
+    });
+    if (user.refreshTokens.length > 5) {
+      user.refreshTokens = user.refreshTokens.slice(-5);
+    }
+    await user.save();
+
+    await redis.del(userId);
+    sendTokenResponse(res, accessToken, refreshToken);
   } catch (err) {
     console.error(err);
     next(err);

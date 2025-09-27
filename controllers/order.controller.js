@@ -8,6 +8,8 @@ import {
   sendDeliveryUpdate,
   sendOrderCancelled,
   sendOrderConfirmation,
+  sendOrderStatusUpdate,
+  sendPaymentConfirmation,
 } from "../services/email.service.js";
 import logger from "../config/logger.config.js";
 
@@ -280,7 +282,7 @@ export const cancelOrder = async (req, res, next) => {
     if (!orderToBeCancelled) return errorResponse(res, "Order not found", 404);
 
     if (
-      orderToBeCancelled.status !== "pending" ||
+      orderToBeCancelled.status !== "pending" &&
       orderToBeCancelled.status !== "placed"
     )
       return errorResponse(

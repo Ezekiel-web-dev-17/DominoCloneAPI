@@ -84,10 +84,13 @@ app.post("/order/update", (req, res) => {
 // Arcjet
 app.use(arcjetMiddleware);
 
-// Routes
+// Routes:
+// Routes that don't need authentication
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/webauthn", webAuthnRoute);
-app.use("/api/v1/products", productRoute);
+app.use("/api/v1/products", productRoute); // Public product viewing
+
+// Apply auth middleware for protected routes
 app.use(authMiddleware);
 app.use("/api/v1/users", usersRoute);
 app.use("/api/v1/orders", orderRoute);

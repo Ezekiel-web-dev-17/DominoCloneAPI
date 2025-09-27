@@ -9,12 +9,13 @@ import {
   cancelOrder,
 } from "../controllers/order.controller.js";
 import { isAdmin, isDriverOrAdmin } from "../middleware/auth.middleware.js";
+import { validateOrder } from "../middleware/error.middleware.js";
 
 const orderRoute = Router();
 
 orderRoute.get("/", isAdmin, getOrders);
 orderRoute.get("/:id", getOrderById);
-orderRoute.post("/", createOrder);
+orderRoute.post("/", validateOrder, createOrder);
 orderRoute.post("/pay/:id", orderPayment);
 orderRoute.get("/track/:id", trackOrder);
 orderRoute.post("/update/:id", isDriverOrAdmin, updateOrder);
