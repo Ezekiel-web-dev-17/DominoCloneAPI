@@ -26,7 +26,7 @@ export const sendAccountVerification = async (user, token, time = "15min") => {
 };
 
 export const sendPasswordReset = async (user, token) => {
-  const resetUrl = `${LIVE_URL}/auth/reset-password?token=${encodeURIComponent(
+  const resetUrl = `${LIVE_URL}auth/reset-password?token=${encodeURIComponent(
     token
   )}&userId=${user._id}`;
   const { subject, text, html } = passwordResetTemplate(user, resetUrl);
