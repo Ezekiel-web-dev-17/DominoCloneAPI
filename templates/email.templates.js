@@ -101,7 +101,7 @@ Enjoy your Domino’s!`,
   <h2>Hi ${user.name},</h2>
   <p>Your order <b>#${order.orderCode}</b> has just been <b>delivered</b>. 🎉</p>
   <p>We hope it’s piping hot and delicious! 🍴</p>
-  <p>Love your meal? <a href="${FRONTEND_URL}#feedback">Leave us feedback</a> – your thoughts help us get even better.</p>
+  <p>Love your meal? <a href="${FRONTEND_URL}/#feedback">Leave us feedback</a> – your thoughts help us get even better.</p>
   <br/>
   <p>Enjoy your Domino’s! 🍕</p>
   `,

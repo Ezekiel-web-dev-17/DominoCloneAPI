@@ -18,6 +18,7 @@ import arcjetMiddleware from "./middleware/arcjet.middleware.js";
 import { authMiddleware } from "./middleware/auth.middleware.js";
 import orderRoute from "./routes/order.route.js";
 import usersRoute from "./routes/user.routes.js";
+import webAuthnRoute from "./routes/webauthn.route.js";
 
 const app = express();
 
@@ -28,7 +29,11 @@ app.use(cookieParser());
 app.use(morgan("dev"));
 
 // Allow only your frontend origins
-const allowedOrigins = [FRONTEND_URL];
+const allowedOrigins = [
+  FRONTEND_URL,
+  "http://localhost:5173",
+  "http://localhost:5174",
+];
 
 app.use(
   cors({
@@ -49,7 +54,7 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", allowedOrigins[0]],
+        scriptSrc: ["'self'", ...allowedOrigins],
         objectSrc: ["'none'"], // no Flash, Silverlight
         upgradeInsecureRequests: [], // forces HTTPS
       },
@@ -81,6 +86,7 @@ app.use(arcjetMiddleware);
 
 // Routes
 app.use("/api/v1/auth", authRoute);
+app.use("/api/v1/webauthn", webAuthnRoute);
 app.use("/api/v1/products", productRoute);
 app.use(authMiddleware);
 app.use("/api/v1/users", usersRoute);

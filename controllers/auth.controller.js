@@ -187,6 +187,9 @@ export const forgotPassword = async (req, res, next) => {
 
     if (!user) return errorResponse(res, "User not found!", 404);
 
+    if (!user.isVerified)
+      return errorResponse(res, "User is not verified.", 400);
+
     const token = crypto.randomBytes(32).toString("hex");
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
@@ -208,13 +211,17 @@ export const forgotPassword = async (req, res, next) => {
 
 export const resetPassword = async (req, res, next) => {
   try {
-    const { newPassword } = req.body;
+    const { newPassword, confirmPassword } = req.body;
     const { token, userId } = req.query;
 
-    console.log("newPassword true");
+    if (!newPassword || !confirmPassword)
+      return errorResponse(res, "All fields are required!", 400);
 
-    if (!newPassword)
-      return errorResponse(res, "New password is required!", 400);
+    if (newPassword !== confirmPassword)
+      return errorResponse(
+        res,
+        "New password field content does not match that of the confirm password."
+      );
 
     if (!token || !userId)
       return errorResponse(res, "Invalid email verification URL", 400);

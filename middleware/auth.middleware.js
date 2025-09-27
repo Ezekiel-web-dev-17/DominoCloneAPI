@@ -47,7 +47,7 @@ export const isDriverOrAdmin = async (req, res, next) => {
   try {
     const user = req.user;
 
-    // 4️⃣ Check if user is admin
+    // 4️⃣ Check if user is not admin or driver
     if (user.role !== "driver" && user.role !== "admin") {
       return errorResponse(res, "Forbidden: Admins and Drivers only", 403);
     }
