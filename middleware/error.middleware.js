@@ -38,6 +38,16 @@ export const validateSignIn = [
   },
 ];
 
+export const validateOrder = [
+  body("items").isArray().withMessage("Items must be an array"),
+  body("items.*.product").isMongoId().withMessage("Invalid product ID"),
+  body("items.*.quantity")
+    .isInt({ min: 1 })
+    .withMessage("Quantity must be positive"),
+  body("address.street").notEmpty().withMessage("Street address required"),
+  body("phone").isMobilePhone().withMessage("Valid phone number required"),
+];
+
 export const errorMiddleware = async (err, req, res, next) => {
   try {
     let error = { ...err };

@@ -41,18 +41,23 @@ export const createProduct = async (req, res, next) => {
     }
 
     // Upload product image to Cloudinary from buffer
-    const uploadResult = await cloudinary.uploader.upload_stream(
-      { public_id: "domino product" },
-      (error, result) => {
-        if (error) return next(error);
-        return result;
-      }
-    );
+    // 🚀 FIXED: Proper Cloudinary upload with buffer
+    const uploadResult = await new Promise((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream(
+          {
+            public_id: `domino-product-${Date.now()}`,
+            folder: "domino-products",
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        )
+        .end(req.file.buffer);
+    });
 
-    // ⚡ If you’re not using streams, you need to write buffer to temp file first.
-    // Or switch to `multer.diskStorage()` and upload with `req.file.path`.
-
-    const optimizeUrl = cloudinary.url("domino product", {
+    const optimizeUrl = cloudinary.url(uploadResult.public_id, {
       fetch_format: "auto",
       quality: "auto",
     });
@@ -71,7 +76,7 @@ export const createProduct = async (req, res, next) => {
       rating,
       isRecommended,
       productImage: uploadResult.secure_url,
-      optimizedImage: optimizeUrl.secure_url,
+      optimizedImage: optimizeUrl,
     });
 
     await product.save();
