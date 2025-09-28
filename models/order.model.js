@@ -64,6 +64,10 @@ const orderSchema = new mongoose.Schema(
     orderCode: {
       type: String,
     },
+    driver: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   {
     timestamps: true,

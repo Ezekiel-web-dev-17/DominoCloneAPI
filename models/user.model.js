@@ -63,12 +63,14 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       match: [/\S+@\S+\.\S+/, "Please provide a valid email address"],
+      index: true,
     },
     // Add these fields for WebAuthn
     username: {
       type: String,
       unique: true,
       sparse: true, // Allow null/undefined for regular users
+      index: true,
     },
     displayName: {
       type: String,
@@ -110,9 +112,6 @@ const userSchema = new mongoose.Schema(
     },
   }
 );
-
-userSchema.index({ email: 1 });
-userSchema.index({ username: 1 });
 
 export const verifyEmail = mongoose.model("VerifyEmail", verifyEmailSchema);
 export const User = mongoose.model("User", userSchema);
