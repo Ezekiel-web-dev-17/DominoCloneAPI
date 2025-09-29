@@ -1,3 +1,5 @@
+import logger from "../config/logger.config.js";
+
 export class SocketConnectionManager {
   constructor() {
     this.connections = new Map();

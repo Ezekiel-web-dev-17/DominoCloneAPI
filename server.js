@@ -1,7 +1,13 @@
 // ==================== ENHANCED SERVER.JS ====================
 import app from "./app.js";
 import http from "http";
-import { LIVE_URL, NODE_ENV } from "./config/env.config.js";
+import {
+  LIVE_URL,
+  NODE_ENV,
+  SOCKET_IO_ORIGINS,
+  SOCKET_PING_INTERVAL,
+  SOCKET_PING_TIMEOUT,
+} from "./config/env.config.js";
 import logger from "./config/logger.config.js";
 import { connectDB } from "./database/connectToDB.js";
 import { Server } from "socket.io";
@@ -19,19 +25,12 @@ const server = http.createServer(app);
 
 // Attach Socket.IO with enhanced configuration
 const dominoIo = new Server(server, {
-  cors: {
-    origin:
-      NODE_ENV === "production"
-        ? [
-            "http://localhost:5173",
-            "http://localhost:5174",
-            "https://domino-clone.vercel.app",
-          ]
-        : "*",
-    methods: ["GET", "POST", "PATCH", "DELETE"],
-    credentials: true,
-  },
+  cors: { origin: SOCKET_IO_ORIGINS?.split(",") },
   transports: ["websocket", "polling"],
+  pingTimeout: parseInt(SOCKET_PING_TIMEOUT) || 60000,
+  pingInterval: parseInt(SOCKET_PING_INTERVAL) || 25000,
+  maxHttpBufferSize: 1e6, // 1MB
+  allowEIO3: false, // Disable Engine.IO v3 compatibility
 });
 
 // Create connection manager instance
@@ -103,6 +102,10 @@ dominoIo.on("connection", (socket) => {
 
 // Make connection manager available to routes
 app.set("connectionManager", connectionManager);
+
+if (NODE_ENV === "production") {
+  app.set("trust proxy", true); // if behind reverse proxy (e.g. Render, Vercel)
+}
 
 // Start server
 server.listen(4000, async () => {

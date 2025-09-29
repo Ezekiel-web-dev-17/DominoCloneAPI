@@ -19,6 +19,7 @@ import {
   saveCredentialForUser,
   updateUserCredentialCounter,
 } from "../services/user.service.js";
+import { generateRefreshTokens } from "../utils/jwt.utils.js";
 
 // Config
 const rpName = "Domino Pizza Clone";

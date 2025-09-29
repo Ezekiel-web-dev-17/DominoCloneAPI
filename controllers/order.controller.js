@@ -961,7 +961,7 @@ const calculateETA = (driverLocation, customerAddress) => {
 
 // ================== REAL-TIME DASHBOARD CONTROLLER ==================
 
-export const getDashboardData = async (req, res, next) => {
+const getDashboardData = async (req, res, next) => {
   try {
     if (req.user.role !== "admin") {
       return errorResponse(res, "Admin access required", 403);
@@ -1019,10 +1019,34 @@ export const getDashboardData = async (req, res, next) => {
   }
 };
 
+// Add to order.controller.js
+const getOrderAnalytics = async (req, res, next) => {
+  try {
+    const analytics = await Order.aggregate([
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          totalOrders: { $sum: 1 },
+          totalRevenue: { $sum: "$totalPrice" },
+          avgOrderValue: { $avg: "$totalPrice" },
+        },
+      },
+      { $sort: { _id: -1 } },
+      { $limit: 30 },
+    ]);
+
+    successResponse(res, { analytics });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export {
   // Export the socket utility functions for use in other modules
   emitToOrderRoom,
   emitToUser,
   emitToDriver,
   emitToAdmins,
+  getDashboardData,
+  getOrderAnalytics,
 };

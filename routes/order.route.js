@@ -15,6 +15,7 @@ import {
   acceptOrder,
   updateDriverLocation,
   getDashboardData,
+  getOrderAnalytics,
 } from "../controllers/order.controller.js";
 import {
   isAdmin,
@@ -43,14 +44,6 @@ orderRoute.patch("/:orderId/location", updateDriverLocation); // Update driver l
 // ================== SHARED ROUTES (DRIVER/ADMIN) ==================
 orderRoute.patch("/update/:id", isDriverOrAdmin, updateOrder); // Update order status
 orderRoute.delete("/:id", isAdmin, cancelOrder); // Cancel order
+orderRoute.delete("/analytics", isAdmin, getOrderAnalytics); // Order analytics
 
 export default orderRoute;
-
-// ==================== SOCKET EVENT HANDLERS ====================
-// utils/socketHandlers.js
-
-// ==================== MIDDLEWARE FOR SOCKET AUTHENTICATION ====================
-// middleware/socketAuth.middleware.js
-
-// ==================== INTEGRATION EXAMPLE ====================
-// server.js (Updated section)

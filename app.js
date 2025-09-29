@@ -71,18 +71,8 @@ cloudinary.config({
   api_secret: CLOUDINARY_API_SECRET, // Click 'View API Keys' above to copy your API secret
 });
 
-// Example REST endpoint to simulate order updates
-app.post("/order/update", (req, res) => {
-  const { orderId, status } = req.body;
-
-  // Broadcast update to order room
-  io.to(orderId).emit("order_status", { orderId, status });
-
-  res.json({ success: true, message: `Order ${orderId} updated to ${status}` });
-});
-
 // Arcjet
-app.use(arcjetMiddleware);
+// app.use(arcjetMiddleware);
 
 // Routes:
 // Routes that don't need authentication
