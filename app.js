@@ -72,7 +72,7 @@ cloudinary.config({
 });
 
 // Arcjet
-// app.use(arcjetMiddleware);
+app.use(arcjetMiddleware);
 
 // Routes:
 // Routes that don't need authentication
