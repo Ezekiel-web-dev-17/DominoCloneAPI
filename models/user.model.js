@@ -56,14 +56,13 @@ const userSchema = new mongoose.Schema(
     name: {
       type: String,
       required: [true, "Name is required"],
+      index: true,
     },
     email: {
       type: String,
-      required: [true, "Email is required"],
-      unique: true,
+      // required: [true, "Email is required"],
       lowercase: true,
       match: [/\S+@\S+\.\S+/, "Please provide a valid email address"],
-      index: true,
     },
     // Add these fields for WebAuthn
     username: {
@@ -77,12 +76,6 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: function () {
-        // Password not required if using WebAuthn only
-        return (
-          !this.webauthnCredentials || this.webauthnCredentials.length === 0
-        );
-      },
       minlength: 6,
       minlength: 6,
     },

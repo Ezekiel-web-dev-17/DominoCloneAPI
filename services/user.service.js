@@ -18,6 +18,7 @@ export async function getUserById(id) {
 /** Create new user */
 export async function createUser({ username, displayName }) {
   const user = new User({
+    name: username,
     username,
     displayName,
     isVerified: false,
